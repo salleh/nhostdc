@@ -126,7 +126,7 @@ services:
     volumes:
       - ./data/minio:/data
   mailhog:
-    image: mailhog/mailhog
+    image: jcalonso/mailhog
     environment:
       SMTP_HOST: ${AUTH_SMTP_HOST:-mailhog}
       SMTP_PORT: ${AUTH_SMTP_PORT:-1025}
