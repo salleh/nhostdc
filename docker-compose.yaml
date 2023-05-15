@@ -1,7 +1,7 @@
-version: '3.6'
+version: "3.6"
 services:
   traefik:
-    image: "traefik:v2.5"
+    image: "traefik:v3.0"
     container_name: "traefik"
     command:
       - "--api.insecure=true"
@@ -22,11 +22,11 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secretpgpassword}
     ports:
-      - '5432:5432'
+      - "5432:5432"
   graphql-engine:
-    image: hasura/graphql-engine:v2.15.2
+    image: hasura/graphql-engine:v2.25.0
     depends_on:
-      - 'postgres'
+      - "postgres"
     restart: always
     expose:
       - 8080
@@ -36,13 +36,13 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: public
       HASURA_GRAPHQL_LOG_LEVEL: debug
-      HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.hasura.rule=Host(`localhost`) && PathPrefix(`/`)"
       - "traefik.http.routers.hasura.entrypoints=web"
   auth:
-    image: nhost/hasura-auth:0.16.2
+    image: nhost/hasura-auth:0.19.3
     depends_on:
       - postgres
       - graphql-engine
@@ -50,7 +50,7 @@ services:
     volumes:
       - ./emails:/app/email-templates
     environment:
-      AUTH_HOST: '0.0.0.0'
+      AUTH_HOST: "0.0.0.0"
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-secretpgpassword}@postgres:5432/postgres
       HASURA_GRAPHQL_GRAPHQL_URL: http://graphql-engine:8080/v1/graphql
       HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
@@ -61,7 +61,7 @@ services:
       AUTH_SMTP_USER: user
       AUTH_SMTP_PASS: password
       AUTH_SMTP_SENDER: mail@example.com
-    expose: 
+    expose:
       - 4000
     labels:
       - "traefik.enable=true"
@@ -70,7 +70,7 @@ services:
       - "traefik.http.routers.auth.middlewares=strip-auth@docker"
       - "traefik.http.routers.auth.entrypoints=web"
   storage:
-    image: nhost/hasura-storage:0.3.1
+    image: nhost/hasura-storage:0.3.4
     depends_on:
       - postgres
       - graphql-engine
@@ -107,7 +107,7 @@ services:
       - "traefik.http.routers.functions.middlewares=strip-functions@docker"
       - "traefik.http.routers.functions.entrypoints=web"
     restart: always
-    expose: 
+    expose:
       - 3000
     volumes:
       - .:/opt/project
@@ -115,7 +115,7 @@ services:
       - /opt/project/data/
       - /opt/project/initdb.d/
   minio:
-    image: minio/minio:RELEASE.2021-09-24T00-24-24Z
+    image: minio/minio:RELEASE.2023-05-04T21-44-30Z
     entrypoint: sh
     command: -c 'mkdir -p /data/nhost && /opt/bin/minio server --address :8484 /data'
     environment:
@@ -135,12 +135,12 @@ services:
       SMTP_SECURE: "${AUTH_SMTP_SECURE:-false}"
       SMTP_SENDER: ${AUTH_SMTP_SENDER:-hbp@hbp.com}
     ports:
-      - ${AUTH_SMTP_PORT:-1025}:1025 
+      - ${AUTH_SMTP_PORT:-1025}:1025
       - 8025:8025
     volumes:
       - ./data/mailhog:/maildir
   dashboard:
-    image: nhost/dashboard:0.7.4
+    image: nhost/dashboard:0.16.9
     ports:
       - "3030:3000"
 volumes:
